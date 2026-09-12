@@ -29,6 +29,7 @@ set(HEADERS
 
     "include/diagnostic/Diagnostic.h"
     "include/templates/StringLiteralParseCPP.h"
+    "include/templates/FloatLiteralParseCPP.h"
 )
 
 add_executable(vlex ${SOURCES} ${HEADERS})

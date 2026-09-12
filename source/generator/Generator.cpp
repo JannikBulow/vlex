@@ -14,6 +14,7 @@
 #include "templates/SourceLocationH.h"
 #include "templates/StringLiteralParseCPP.h"
 #include "templates/CharLiteralParseCPP.h"
+#include "templates/FloatLiteralParseCPP.h"
 #include "templates/Token1CPP.h"
 #include "templates/Token2CPP.h"
 #include "templates/TokenH.h"
@@ -298,6 +299,10 @@ namespace {}{}lexer
             {
                 tokenType = special.tokenType?*special.tokenType:"IntegerLiteral";
             }
+            else if (special.syntax == "_float_literal")
+            {
+                tokenType = special.tokenType?*special.tokenType:"FloatLiteral";
+            }
             else if (special.syntax == "_string_literal")
             {
                 tokenType = special.tokenType?*special.tokenType:"StringLiteral";
@@ -440,6 +445,32 @@ namespace {}{}lexer
                     it->second = std::move(value);
                 } else {
                     names[tokenType] = "an integer literal";
+                }
+            }
+            else if (special.syntax == "_float_literal")
+            {
+                std::string tokenType;
+                if (special.tokenType)
+                {
+                    tokenType = *special.tokenType;
+                }
+                else
+                {
+                    tokenType = "FloatLiteral";
+                }
+
+                auto it = names.find(tokenType);
+                if (it != names.end()) {
+                    std::string value = std::string(english::getIndefiniteArticle(tokenType));
+                    value += " ";
+                    value += tokenType;
+
+                    std::transform(value.begin(), value.end(), value.begin(),
+                                   [](auto c){ return std::tolower(c); });
+
+                    it->second = std::move(value);
+                } else {
+                    names[tokenType] = "a float literal";
                 }
             }
             else if (special.syntax == "_string_literal")
@@ -600,6 +631,10 @@ namespace {}{}lexer
             else if (special.syntax == "_integer_literal")
             {
                 stream << std::format(templates::IntegerLiteralParseCPP, special.tokenType?*special.tokenType:"IntegerLiteral");
+            }
+            else if (special.syntax == "_float_literal")
+            {
+                stream << std::format(templates::FloatLiteralParseCPP, special.tokenType?*special.tokenType:"FloatLiteral");
             }
             else if (special.syntax == "_string_literal")
             {
