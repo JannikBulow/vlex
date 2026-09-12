@@ -5,7 +5,7 @@
 
 namespace templates
 {
-    constexpr const char* FloatLiteralParseCPP = R"(        if (std::isdigit(current()) || (current() == '.' && std::isdigit(peek(1)))
+    constexpr const char* FloatLiteralParseCPP = R"(        if (std::isdigit(current()) || (current() == '.' && std::isdigit(peek(1))))
         {{
             std::string text;
 
