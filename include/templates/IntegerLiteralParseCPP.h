@@ -3,7 +3,7 @@
 
 namespace templates
 {
-    constexpr const char* IntegerLiteralParseCPP = R"(        if (std::isdigit(current()))
+    constexpr const char* IntegerLiteralParseCPP = R"(        if (std::isdigit(current()) && peek(1) != '.')
         {{
             std::string text = std::string(1, current());
             if (current() == '0')
