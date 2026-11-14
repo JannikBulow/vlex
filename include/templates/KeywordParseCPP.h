@@ -14,9 +14,15 @@ namespace templates
 
             if (keywords.find(text) != keywords.end())
             {
+                SourceLocation end = mSourceLocation;
+                end.col++;
+                end.position++;
                 return Token(std::move(text), keywords.at(text), start, mSourceLocation);
             }
-            
+
+            SourceLocation end = mSourceLocation;
+            end.col++;
+            end.position++;
             return Token(std::move(text), TokenType::Error, start, mSourceLocation);
         })";
 }

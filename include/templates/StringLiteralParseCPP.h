@@ -39,7 +39,10 @@ namespace templates
                 }}
                 consume();
             }}
-            return Token(std::move(text), TokenType::{}, start, mSourceLocation);
+            SourceLocation end = mSourceLocation;
+            end.col++;
+            end.position++;
+            return Token(std::move(text), TokenType::{}, start, end);
         }}
 )";
 }

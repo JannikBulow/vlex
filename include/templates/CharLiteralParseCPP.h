@@ -39,9 +39,15 @@ namespace templates
 
             if (current() != '\'')
             {{
-                return Token(std::string(1, value), TokenType::Error, start, mSourceLocation);
+                SourceLocation end = mSourceLocation;
+                end.col++;
+                end.position++;
+                return Token(std::string(1, value), TokenType::Error, start, end);
             }}
-            return Token(std::string(1, value), TokenType::{}, start, mSourceLocation);
+            SourceLocation end = mSourceLocation;
+            end.col++;
+            end.position++;
+            return Token(std::string(1, value), TokenType::{}, start, end);
         }}
 )";
 }

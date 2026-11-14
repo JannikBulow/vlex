@@ -16,10 +16,16 @@ namespace templates
 
             if (keywords.find(text) != keywords.end())
             {{
-                return Token(std::move(text), keywords.at(text), start, mSourceLocation);
+                SourceLocation end = mSourceLocation;
+                end.col++;
+                end.position++;
+                return Token(std::move(text), keywords.at(text), start, end);
             }}
-            
-            return Token(std::move(text), TokenType::{}, start, mSourceLocation);
+
+            SourceLocation end = mSourceLocation;
+            end.col++;
+            end.position++;
+            return Token(std::move(text), TokenType::{}, start, end);
         }}
 )";
 }

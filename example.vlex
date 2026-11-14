@@ -8,6 +8,10 @@ tokens {
     fn FUNCTION
     _integer_literal INTS
 
+    <<
+    >>
+    >>>
+
     _string_literal
     _character_literal
 }
