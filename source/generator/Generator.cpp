@@ -322,6 +322,12 @@ namespace {}{}lexer
                 tokenTypes.push_back(tokenType);
             }
         }
+        for (const auto& comment : mComments)
+        {
+            std::string tokenType = comment.close.empty() ? "LineComment" : "BlockComment";
+
+            if (std::find(tokenTypes.begin(), tokenTypes.end(), tokenType) == tokenTypes.end()) tokenTypes.push_back(tokenType);
+        }
         for (auto& tokenType : tokenTypes)
         {
             tokenH << std::format("\t\t{},\n", tokenType);
@@ -527,6 +533,12 @@ namespace {}{}lexer
             }
         }
 
+        for (const auto& comment : mComments)
+        {
+            std::string tokenType = comment.close.empty() ? "LineComment" : "BlockComment";
+            names[tokenType] = comment.close.empty() ? "a line comment" : "a block comment";
+        }
+
         std::string_view namespaceQualifier = mNamespaceName.empty() ? "" : "::";
 
         tokenCPP << std::vformat(templates::Token1CPP, std::make_format_args(mNamespaceName, namespaceQualifier));
@@ -591,28 +603,66 @@ namespace {}{}lexer
             return std::nullopt;
 )";
 
-        for (auto& comment : mComments)
-        {
-            if (comment.close.empty())
-            {
+        for (auto& comment : mComments) {
+            if (comment.close.empty()) {
                 lexerCPP << std::format(R"(
         if (mText.substr(mPosition, {0}) == "{1}")
         {{
             for (int i = 0; i < {0}; ++i) consume();
-            while (current() != '\n') consume();
-            return std::nullopt;
-        }})", comment.open.length(), comment.open);
-            }
+
+            std::string text;
+            while (mPosition < mText.length() && current() != '\n')
+            {{
+                text += current();
+                consume();
+            }}
+
+            while (!text.empty() && std::isspace(static_cast<unsigned char>(text.back())))
+                text.pop_back();
+
+            auto first = text.find_first_not_of(" \t\r\n");
+            if (first != std::string::npos)
+                text.erase(0, first);
             else
-            {
+                text.clear();
+
+            SourceLocation end = mSourceLocation;
+            if (mPosition < mText.length())
+                end.position--, end.col--;
+
+            return Token(std::move(text), TokenType::LineComment, start, end);
+        }})", comment.open.length(), comment.open);
+            } else {
                 lexerCPP << std::format(R"(
         if (mText.substr(mPosition, {0}) == "{1}")
         {{
             for (int i = 0; i < {0}; ++i) consume();
-            while (mText.substr(mPosition, {2}) != "{3}") consume();
-            for (int i = 0; i < {4}; ++i) consume();
-            return std::nullopt;
-        }})", comment.open.length(), comment.open, comment.close.length(), comment.close, comment.close.length()-1);
+
+            std::string text;
+            while (mPosition < mText.length() && mText.substr(mPosition, {2}) != "{3}")
+            {{
+                text += current();
+                consume();
+            }}
+
+            if (mPosition < mText.length())
+            {{
+                for (int i = 0; i < {2}; ++i)
+                    consume();
+            }}
+
+            while (!text.empty() && std::isspace(static_cast<unsigned char>(text.back())))
+                text.pop_back();
+
+            auto first = text.find_first_not_of(" \t\r\n");
+            if (first != std::string::npos)
+                text.erase(0, first);
+            else
+                text.clear();
+
+            SourceLocation end = mSourceLocation;
+            return Token(std::move(text), TokenType::LineComment, start, end);
+        }})", comment.open.length(), comment.open, comment.close.length(), comment.close);
             }
         }
 
